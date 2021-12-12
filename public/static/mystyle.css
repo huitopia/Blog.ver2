@@ -1,0 +1,28 @@
+body {
+    width: 1200px;
+    margin: auto;
+}
+.input-box {
+    margin-top: 30px;
+}
+.input-group{
+    width: 700px;
+    margin: auto;
+}
+.btn1 {
+    width: 90px;
+    margin-top: 1px;
+    margin-left: 850px;
+    margin-bottom: 30px;
+}
+.btn2{
+  width: 200px;
+  margin: auto;
+}
+.textbox {
+    height: 200px;
+} 
+#comment-table {
+  width: 700px;
+  margin: auto;
+}

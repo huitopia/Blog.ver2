@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+    integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <!-- Font Awesome CSS -->
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
+    integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+  <link href="/static/mystyle.css" rel="stylesheet">
+  <script src="/static/user.js"></script>
+  <title>huitopia | blog</title>
+  <script type="text/javascript">
+    let postId = "<%= id %>"
+    console.log(postId)
+
+    $(document).ready(function () {
+      getDetailPost()
+      loadComment()
+      if (localStorage.getItem("token")) {
+        userName()
+        $("#signup").hide()
+        $("#login").hide()
+      } else {
+        $("#logout").hide
+      }
+    })
+
+    function makePost() {
+      window.location.href = "/post"
+    }
+
+    function getDetailPost() {
+      $("#postlist").empty()
+      $.ajax({
+        type: "GET",
+        url: `/api/post/${postId}`,
+        data: {},
+        success: function (response) {
+          let post = response["post"]
+          let author = post['author']
+          let password = post['password']
+          let title = post['title']
+          let description = post['description']
+
+          $('#author').val(author)
+          $('#title').val(title)
+          $('#description').val(description)
+        }
+
+      })
+    }
+
+    function updatePost() {
+      window.location.href = `/update/${postId}`
+    }
+
+    function saveComment() {
+      // url로 쿼리 값 보내서 받아와? 뭘 쓰는진 알고 쓰니?
+      // 이제 안다!!! 주소에 저장 해 둔 postId값 가져와서 특정화 시킨다!!!
+      // let searchParams = new URLSearchParams(window.location.search)
+      // let postId = searchParams.get('postId')
+      // let searchPath = window.location.pathname
+      // let postId = searchPath.split('/')[2]
+      console.log("----------------------")
+      console.log(postId)
+      if ($('#descriptionComment').val().length === 0) { // 어디서 뭘 가져올거고 가져 갈건지 명확하게 생각해서 써라
+        alert("댓글 내용을 입력해 주세요")
+        window.location.reload()
+      } else {
+        $.ajax({
+          type: "POST",
+          url: "/api/comment",
+          data: {
+            postId,
+            description: $('#descriptionComment').val(),
+          },
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          success: function (response) {
+            if (response["result"] == "success") {
+              alert("댓글 작성 완료!")
+            }
+            // window.location.href = `/detail?postId=${postId}` // 두가지 방법을 쓸 수 있다아~
+            window.location.reload()
+          }
+        })
+      }
+    }
+    function loadComment() {
+      // url로 쿼리 값 보내서 받아와? 뭘 쓰는진 알고 쓰니?
+      // 이제 안다!!! 주소에 저장 해 둔 postId값 가져와서 특정화 시킨다!!!
+      // let searchParams = new URLSearchParams(window.location.search)
+      // let postId = searchParams.get('postId')
+      $.ajax({
+        type: "GET",
+        url: `/api/comment/${postId}`,
+        // dataType:'json',
+        data: {},
+        success: function (response) {
+          let comment = response["comment"]
+          console.log(comment) // 함 찍어 봤다
+          for (let i = 0; i < comment.length; i++) {
+            let author = comment[i]['author']
+            let description = comment[i]['description']
+            let date = comment[i]['date']
+            let commentId = comment[i]['commentId']
+            let temp_html = `<tr onclick="location='comment/${comment[i]["commentId"]}';">
+                                <td>${author}</td>
+                                <td id="desc${commentId}">${description}</td>
+                            </tr>`
+            // desc${commentId}
+
+            let temp_html2 = `<button onclick="modifyComment(${commentId})" id="btn-modify${commentId}" type="button" class="btn btn1 btn-secondary btn-sm">Update</button>
+                            <button onclick="deleteComment(${commentId})" id="btn-delete" type="button" class="btn btn1 btn-secondary btn-sm">Delete</button>`
+            $('#commentList').append(temp_html)
+            $('#commentBtn').append(temp_html2)
+          }
+        }
+      })
+    }
+    function deleteComment(commentId) {
+      // 전달받은 코멘트아이디로 특정해서 삭제
+      // 한번 더 고민
+      if (confirm("정말로 삭제하시겠습니까?") == true) {
+        $.ajax({
+          type: "DELETE",
+          url: `/api/comment`,
+          data: { commentId },
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          success: function (response) {
+            alert(response['msg'])
+            // window.location.href = '/' // 실행 순서 제대로 기억하고 써라 // 동기 & 비동기 구분
+            window.location.reload()
+          }
+        })
+
+      }
+      else {
+        return;
+      }
+    }
+    function modifyComment(commentId) {
+      if ($('#btn-modify' + commentId).text() === '수정완료') {
+        $.ajax({
+          type: "PUT",
+          url: `/api/comment`,
+          data: {
+            commentId,
+            description: $('#newDesc').val(),
+          },
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          success: function (response) {
+            alert(response['msg'])
+            window.location.reload()
+          }
+
+        })
+      }
+      let baseComment = $('#desc' + commentId).text() // val 이 안되면 text 든 뭐든 다 써 봐 징징대지 말고
+      $('#desc' + commentId).empty()
+      $("#desc" + commentId).append(`<textarea id="newDesc">${baseComment}</textarea>`);
+      // 안 와 닿음
+      $('#btn-modify' + commentId).empty()
+      $('#btn-modify' + commentId).append(`수정완료`)
+      // console.log($('#btn-modify').text())
+
+
+    }
+
+    function alarm() {
+      if (localStorage.getItem("token") === null) {
+        alert("로그인이 필요한 기능입니다")
+        window.location.href = 'login'
+      }
+    }
+
+  </script>
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand">HUITOPIA BLOG</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" onclick="makePost()" id="posting">Post</a>
+        <a class="nav-item nav-link" onclick="login()" id="login">Login</a>
+        <a class="nav-item nav-link" onclick="logout()" id="logout">Logout</a>
+        <a class="nav-item nav-link" onclick="signup()" id="signup">Signup</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="input-box" id="posting">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">Title</span>
+      </div>
+      <input type="text" class="form-control" id="title" aria-describedby="basic-addon3">
+    </div>
+    <div class="input-group mb-3 textbox">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">Contents</span>
+      </div>
+      <input type="text" class="form-control textbox" id="description" aria-describedby="basic-addon3" maxlength="1000">
+    </div>
+
+  </div>
+  <button onclick="updatePost()" type="submit" class="btn btn1 btn-outline-dark" id="updatebtn">Update</button>
+
+  <div class="input-box" id="posting-comment">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">Comment</span>
+      </div>
+      <input onclick="alarm()" type="text" class="form-control" id="descriptionComment" aria-describedby="basic-addon3" maxlength="10">
+    </div>
+  </div>
+  <button type="submit" class="btn btn1 btn-outline-dark" onclick="saveComment()" id="comment-btn">Upload</button>
+
+  <table class="table" id="comment-table">
+    <thead>
+      <tr>
+        <th scope="col">Nickname</th>
+        <th scope="col">Comment</th>
+      </tr>
+    </thead>
+    <tbody id="commentList"></tbody>
+  </table>
+  <div id="commentBtn">
+
+  </div>
+
+</body>
+
+
+</html>

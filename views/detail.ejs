@@ -75,14 +75,6 @@
     }
 
     function saveComment() {
-      // url로 쿼리 값 보내서 받아와? 뭘 쓰는진 알고 쓰니?
-      // 이제 안다!!! 주소에 저장 해 둔 postId값 가져와서 특정화 시킨다!!!
-      // let searchParams = new URLSearchParams(window.location.search)
-      // let postId = searchParams.get('postId')
-      // let searchPath = window.location.pathname
-      // let postId = searchPath.split('/')[2]
-      console.log("----------------------")
-      console.log(postId)
       if ($('#descriptionComment').val().length === 0) { // 어디서 뭘 가져올거고 가져 갈건지 명확하게 생각해서 써라
         alert("댓글 내용을 입력해 주세요")
         window.location.reload()
@@ -101,21 +93,15 @@
             if (response["result"] == "success") {
               alert("댓글 작성 완료!")
             }
-            // window.location.href = `/detail?postId=${postId}` // 두가지 방법을 쓸 수 있다아~
             window.location.reload()
           }
         })
       }
     }
     function loadComment() {
-      // url로 쿼리 값 보내서 받아와? 뭘 쓰는진 알고 쓰니?
-      // 이제 안다!!! 주소에 저장 해 둔 postId값 가져와서 특정화 시킨다!!!
-      // let searchParams = new URLSearchParams(window.location.search)
-      // let postId = searchParams.get('postId')
       $.ajax({
         type: "GET",
         url: `/api/comment/${postId}`,
-        // dataType:'json',
         data: {},
         success: function (response) {
           let comment = response["comment"]
@@ -129,7 +115,6 @@
                                 <td>${author}</td>
                                 <td id="desc${commentId}">${description}</td>
                             </tr>`
-            // desc${commentId}
 
             let temp_html2 = `<button onclick="modifyComment(${commentId})" id="btn-modify${commentId}" type="button" class="btn btn1 btn-secondary btn-sm">Update</button>
                             <button onclick="deleteComment(${commentId})" id="btn-delete" type="button" class="btn btn1 btn-secondary btn-sm">Delete</button>`
@@ -140,8 +125,6 @@
       })
     }
     function deleteComment(commentId) {
-      // 전달받은 코멘트아이디로 특정해서 삭제
-      // 한번 더 고민
       if (confirm("정말로 삭제하시겠습니까?") == true) {
         $.ajax({
           type: "DELETE",
@@ -152,7 +135,6 @@
           },
           success: function (response) {
             alert(response['msg'])
-            // window.location.href = '/' // 실행 순서 제대로 기억하고 써라 // 동기 & 비동기 구분
             window.location.reload()
           }
         })
@@ -181,13 +163,11 @@
 
         })
       }
-      let baseComment = $('#desc' + commentId).text() // val 이 안되면 text 든 뭐든 다 써 봐 징징대지 말고
+      let baseComment = $('#desc' + commentId).text()
       $('#desc' + commentId).empty()
       $("#desc" + commentId).append(`<textarea id="newDesc">${baseComment}</textarea>`);
-      // 안 와 닿음
       $('#btn-modify' + commentId).empty()
       $('#btn-modify' + commentId).append(`수정완료`)
-      // console.log($('#btn-modify').text())
 
 
     }

@@ -65,12 +65,6 @@
     }
     // 수정 함수
     function updatePost() {
-      // url로 쿼리 값 보내서 받아와? 뭘 쓰는진 알고 쓰니?
-      // 이제 안다!!! 주소에 저장 해 둔 postId값 가져와서 특정화 시킨다!!!
-      // let searchParams = new URLSearchParams(window.location.search)
-      // let postId = searchParams.get('postId')
-      // let searchPath = window.location.pathname
-      // let postId = searchPath.split('/')[2]
       $.ajax({
         type: "PUT",
         url: `/api/post/${postId}`,
@@ -100,12 +94,10 @@
           authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         data: {
-          // password: $('#password').val(),
         },
         success: function (response) {
           alert(response['msg'])
-          window.location.href = '/' // 실행 순서 제대로 기억하고 써라 // 동기 & 비동기 구분
-          // window.location.reload()
+          window.location.href = '/' 
         }
       })
     }
